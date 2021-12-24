@@ -13,6 +13,7 @@ const defaultOptions: Options = {
   output: '',
   path: '*',
   archiveOptions: {},
+  ignore: [],
 };
 
 const getArchiveType = (input: string): ArchiveType => {
@@ -105,6 +106,7 @@ class Archiver {
 
     const globOptions = {
       ignore: [
+        ...this.options.ignore || [],
         // don't include the outfile in the zip
         path.basename(this.outfile),
       ],

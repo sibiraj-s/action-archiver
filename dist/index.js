@@ -41,6 +41,7 @@ const defaultOptions = {
     output: '',
     path: '*',
     archiveOptions: {},
+    ignore: [],
 };
 const getArchiveType = (input) => {
     if ((0, is_glob_1.default)(input)) {
@@ -109,6 +110,7 @@ class Archiver {
         await (0, ensure_dir_1.default)(destDir);
         const globOptions = {
             ignore: [
+                ...this.options.ignore || [],
                 // don't include the outfile in the zip
                 node_path_1.default.basename(this.outfile),
             ],
@@ -231,6 +233,7 @@ const run = async () => {
     const inputPath = core.getInput('path', { required: true });
     const output = core.getInput('output', { required: true });
     const workingDirectory = core.getInput('working-directory');
+    const ignore = core.getMultilineInput('ignore');
     const options = getArchiverOptions(format);
     const cwd = node_path_1.default.join(process.cwd(), workingDirectory);
     const archiver = new archiver_1.default({
@@ -239,6 +242,7 @@ const run = async () => {
         path: inputPath,
         output,
         archiveOptions: (0, clean_object_1.default)(options),
+        ignore,
     });
     await archiver.run();
     core.endGroup();

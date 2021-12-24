@@ -45,6 +45,7 @@ const run = async () => {
   const inputPath = core.getInput('path', { required: true });
   const output = core.getInput('output', { required: true });
   const workingDirectory = core.getInput('working-directory');
+  const ignore = core.getMultilineInput('ignore');
 
   const options = getArchiverOptions(format);
   const cwd = path.join(process.cwd(), workingDirectory);
@@ -55,6 +56,7 @@ const run = async () => {
     path: inputPath,
     output,
     archiveOptions: cleanObj(options),
+    ignore,
   });
 
   await archiver.run();

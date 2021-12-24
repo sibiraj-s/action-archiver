@@ -7,6 +7,7 @@ export interface Options {
   format: Format;
   path: string;
   output?: string;
+  ignore?: string[];
   archiveOptions?: ArchiverOptions;
 }
 

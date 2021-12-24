@@ -83,12 +83,33 @@ describe('Archiver', () => {
     expect(await zipHasFile(archiver.outfile, path.basename(file2))).toBe(true);
   });
 
-  it('should not include the outfile in the archive', async () => {
+  it('should ignore files in the given directory', async () => {
     const archiver = new Archiver({
       format: 'zip',
       cwd: root,
       path: './',
       output: 'archive_4.zip',
+      ignore: [
+        path.basename(file2),
+      ],
+    });
+
+    await archiver.run();
+    expect(fs.existsSync(archiver.outfile)).toBe(true);
+
+    expect(mockSetOutput).toHaveBeenCalled();
+    expect(mockSetOutput).toBeCalledWith('archive', archiver.outfile);
+
+    expect(await zipHasFile(archiver.outfile, path.basename(file1))).toBe(true);
+    expect(await zipHasFile(archiver.outfile, path.basename(file2))).toBe(false);
+  });
+
+  it('should not include the outfile in the archive', async () => {
+    const archiver = new Archiver({
+      format: 'zip',
+      cwd: root,
+      path: './',
+      output: 'archive_5.zip',
     });
 
     await archiver.run();

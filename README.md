@@ -57,6 +57,19 @@ steps:
       gzip: true
 ```
 
+**Ignore files**
+
+```yml
+steps:
+  - uses: sibiraj-s/action-archiver@v1
+    with:
+      path: '**/*'
+      output: dist.tar
+      ignore: |
+        **/*.md
+        **/*.yml
+```
+
 ## Security
 
 For better security it is recommended to pin actions to a full length commit SHA.
