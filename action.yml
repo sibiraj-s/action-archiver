@@ -1,0 +1,37 @@
+name: Archiver
+description: GitHub Action to generate archives
+author: sibiraj-s
+
+branding:
+  icon: archive
+  color: blue
+
+runs:
+  using: node16
+  main: dist/index.js
+
+inputs:
+  working-directory:
+    description: Current working directory for the action
+    required: false
+    default: ''
+  format:
+    description: The archive format to use. Either zip or tar
+    required: true
+    default: tar
+  path:
+    description: A File or directory or glob pattern to archive
+    required: true
+    default: '*'
+  output:
+    description: Name of the output file
+    required: true
+    default: '__archive__'
+  gzip:
+    description: Compress the tar archive using gzip
+    required: false
+    default: false
+  compression-level:
+    description: Compression level for the archive
+    required: false
+    default: 4

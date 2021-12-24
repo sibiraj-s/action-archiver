@@ -1,0 +1,69 @@
+name: Compress
+
+env:
+  NODE_VERSION: 16
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  compress:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: node --version
+      - run: npm --version
+
+      - run: npm ci
+
+      - name: Compress dist directory
+        id: archive-dist
+        uses: ./
+        with:
+          path: 'dist/**'
+          format: tar
+          output: dist.tar
+
+      - name: Compress src directory
+        id: archive-src
+        uses: ./
+        with:
+          path: 'src/**'
+          format: tar
+          output: src.tar.gz
+          gzip: true
+
+      - name: Verify compressed files
+        run: |
+          declare -a arr=(
+            ${{ steps.archive-dist.outputs.archive }}
+            ${{ steps.archive-src.outputs.archive }}
+          )
+
+          for i in "${arr[@]}"
+          do
+            echo "Looking for file: $i"
+            if [ ! -f $i ]; then
+              echo "File '$i' does not exist."
+              exit 1
+            else
+              echo "File exists: $i"
+            fi
+
+          done
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: |
+            dist.tar
+            src.tar.gz
+          retention-days: 2

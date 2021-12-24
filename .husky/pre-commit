@@ -1,0 +1,15 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+npx --no lint-staged
+
+# clear output directories
+rm -rf lib
+rm -rf dist
+
+# build package
+npm run build
+npm run package
+
+# include dist files
+git add dist/
