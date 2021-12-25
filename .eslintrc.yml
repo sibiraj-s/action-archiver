@@ -9,3 +9,6 @@ overrides:
       - pegasus/typescript
     parserOptions:
       project: tsconfig.eslint.json
+  - files: 'tests/*.ts'
+    rules:
+      max-lines-per-function: off
