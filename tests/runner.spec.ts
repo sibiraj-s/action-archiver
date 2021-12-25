@@ -16,7 +16,7 @@ describe('Runner', () => {
     await fs.promises.rm(tempy.root, { force: true, recursive: true });
   });
 
-  it('should throw error for unknown format', async () => {
+  it('should create archive correctly', async () => {
     process.env.INPUT_FORMAT = 'tar';
     process.env.INPUT_PATH = '*';
     process.env.INPUT_OUTPUT = 'runner.zip';
@@ -34,6 +34,17 @@ describe('Runner', () => {
 
     expect(mockSetOutput).toHaveBeenCalled();
     expect(mockSetOutput).toHaveBeenCalledWith('archive', outfile);
+  });
+
+  it('should create a zip archive', async () => {
+    process.env.INPUT_FORMAT = 'zip';
+    process.env.INPUT_PATH = '*';
+    process.env.INPUT_OUTPUT = 'runner_a.zip';
+    process.env['INPUT_WORKING-DIRECTORY'] = '.tmp';
+
+    await run();
+    const outfile = path.join(process.cwd(), '.tmp/runner_a.zip');
+    expect(fs.existsSync(outfile)).toBe(true);
   });
 
   it('should throw error for unknown format', () => {
