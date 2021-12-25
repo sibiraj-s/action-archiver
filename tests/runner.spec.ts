@@ -35,4 +35,9 @@ describe('Runner', () => {
     expect(mockSetOutput).toHaveBeenCalled();
     expect(mockSetOutput).toHaveBeenCalledWith('archive', outfile);
   });
+
+  it('should throw error for unknown format', () => {
+    process.env.INPUT_FORMAT = 'xar';
+    expect(run()).rejects.toThrow('Format \'xar\' is not registered.');
+  });
 });
