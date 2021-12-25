@@ -96,8 +96,7 @@ class Archiver {
         const archiveType = getArchiveType(input);
         this.outfile = getOutfilename(input, archiveType, this.options);
         if (!archiveType) {
-            core.setFailed(`Path '${this.options.path}' doesnot exist`);
-            return;
+            throw new Error(`Path '${this.options.path}' doesnot exist`);
         }
         const output = node_fs_1.default.createWriteStream(this.outfile);
         const streamClose = new Promise((resolve) => {

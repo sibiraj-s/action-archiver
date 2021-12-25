@@ -174,4 +174,15 @@ describe('Archiver', () => {
 
     expect(path.basename(archiver.outfile)).toBe('.tmp.tar.gz');
   });
+
+  it('should throw error when input does not exist', () => {
+    const archiver = new Archiver({
+      cwd: root,
+      format: 'tar',
+      path: 'not_exist.file',
+      output: 'no.zip',
+    });
+
+    expect(archiver.run()).rejects.toThrow();
+  });
 });
