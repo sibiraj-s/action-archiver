@@ -53,8 +53,8 @@ steps:
     with:
       path: '**/*.js'
       format: tar
-      output: dist.tar.gz
       gzip: true
+      output: dist.tar.gz
 ```
 
 **Ignore files**
