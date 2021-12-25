@@ -12,9 +12,11 @@ jobs:
   compress:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - uses: actions/setup-node@v2
+      - name: Setup node.js v${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -22,7 +24,8 @@ jobs:
       - run: node --version
       - run: npm --version
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
       - name: Compress dist directory
         id: archive-dist
@@ -60,10 +63,11 @@ jobs:
 
           done
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
         with:
           name: build
+          retention-days: 2
           path: |
             dist.tar
             src.tar.gz
-          retention-days: 2

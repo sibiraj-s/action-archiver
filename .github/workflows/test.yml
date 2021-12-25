@@ -23,7 +23,10 @@ jobs:
       - run: node --version
       - run: npm --version
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Tests
+      - name: Run Tests
         run: npm run test
+        env:
+          NODE_ENV: test
