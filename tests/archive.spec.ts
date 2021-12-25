@@ -140,7 +140,23 @@ describe('Archiver', () => {
     expect(await zipHasFile(archiver.outfile, path.basename(file1))).toBe(true);
   });
 
-  it('should guess the outfile name as zip for given file', async () => {
+  it('should guess the outfile filename for the given flob', async () => {
+    const archiver = new Archiver({
+      format: 'zip',
+      cwd: root,
+      path: 'src/*',
+    });
+
+    await archiver.run();
+    expect(fs.existsSync(archiver.outfile)).toBe(true);
+
+    expect(mockSetOutput).toHaveBeenCalled();
+    expect(mockSetOutput).toBeCalledWith('archive', archiver.outfile);
+
+    expect(archiver.outfile.endsWith('src.zip')).toBe(true);
+  });
+
+  it('should guess the outfile extension as .zip for given file', async () => {
     const archiver = new Archiver({
       format: 'zip',
       cwd: root,
@@ -156,7 +172,7 @@ describe('Archiver', () => {
     expect(archiver.outfile.endsWith(`${path.basename(file1)}.zip`)).toBe(true);
   });
 
-  it('should guess the outfile as tar for given directory', async () => {
+  it('should guess the outfile extension as .tar for given directory', async () => {
     const archiver = new Archiver({
       format: 'tar',
       cwd: root,
@@ -172,7 +188,7 @@ describe('Archiver', () => {
     expect(path.basename(archiver.outfile)).toBe('.tmp.tar');
   });
 
-  it('should guess the outfile name as tar.gz for given directory', async () => {
+  it('should guess the outfile extension as .tar.gz for given directory', async () => {
     const archiver = new Archiver({
       format: 'tar',
       cwd: root,
