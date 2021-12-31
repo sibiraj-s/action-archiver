@@ -28,7 +28,7 @@
     "is-glob": "^4.0.3"
   },
   "devDependencies": {
-    "@commitlint/cli": "^15.0.0",
+    "@commitlint/cli": "^16.0.1",
     "@jest/globals": "^27.4.4",
     "@types/archiver": "^5.1.1",
     "@types/is-glob": "^4.0.2",
