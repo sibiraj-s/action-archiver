@@ -116,7 +116,7 @@ class Archiver {
                 break;
             }
             default:
-                throw new Error('Unknown archive type. Input file or directory not found.');
+                break;
         }
         await archive.finalize();
         await streamClose;
@@ -525,7 +525,6 @@ function getBooleanInput(name, options) {
     const trueValue = ['true', 'True', 'TRUE'];
     const falseValue = ['false', 'False', 'FALSE'];
     const val = getInput(name, options);
-    console.log('**', typeof val, val)
     if (trueValue.includes(val))
         return true;
     if (falseValue.includes(val))

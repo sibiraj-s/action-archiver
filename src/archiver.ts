@@ -136,7 +136,7 @@ class Archiver {
       }
 
       default:
-        throw new Error('Unknown archive type. Input file or directory not found.');
+        break;
     }
 
     await archive.finalize();
