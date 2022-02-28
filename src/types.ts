@@ -1,10 +1,12 @@
 import type { ArchiverOptions, Format } from 'archiver';
 
 export interface Inputs {
+  workingDirectory: string;
   format: Format;
   path: string;
   output: string;
-  workingDirectory: string;
+  gzip: boolean;
+  compressionLevel: number;
   ignore: string[];
 }
 

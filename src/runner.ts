@@ -5,23 +5,21 @@ import Archiver from './archiver';
 import cleanObj from './utils/clean-object';
 import type { ZlibOptions, ArchiverOptions, Format, Inputs } from './types';
 
-const getArchiverOptions = (format: Format): ArchiverOptions => {
-  const compressionLevel = core.getInput('compression-level');
-
+const getArchiverOptions = (inputs: Inputs): ArchiverOptions => {
   const zlibOptions: ZlibOptions = {
-    level: Number(compressionLevel),
+    level: inputs.compressionLevel,
   };
 
   const options: ArchiverOptions = {};
 
-  switch (format) {
+  switch (inputs.format) {
     case 'zip': {
       options.zlib = cleanObj(zlibOptions);
       break;
     }
 
     case 'tar': {
-      options.gzip = core.getBooleanInput('gzip');
+      options.gzip = inputs.gzip;
       options.gzipOptions = cleanObj(zlibOptions);
       break;
     }
@@ -33,12 +31,14 @@ const getArchiverOptions = (format: Format): ArchiverOptions => {
   return options;
 };
 
-const getInputs = ():Inputs => {
+const getInputs = (): Inputs => {
   return {
+    workingDirectory: core.getInput('working-directory'),
     format: core.getInput('format', { required: true }) as Format,
     path: core.getInput('path', { required: true }),
     output: core.getInput('output', { required: true }),
-    workingDirectory: core.getInput('working-directory'),
+    gzip: core.getBooleanInput('gzip'),
+    compressionLevel: Number(core.getInput('compression-level')),
     ignore: core.getMultilineInput('ignore'),
   };
 };
@@ -53,7 +53,7 @@ const run = async (): Promise<void> => {
       throw new Error(`Format '${inputs.format}' is not registered.`);
     }
 
-    const options = getArchiverOptions(inputs.format);
+    const options = getArchiverOptions(inputs);
     const cwd = path.join(process.cwd(), inputs.workingDirectory);
 
     const archiver = new Archiver({
