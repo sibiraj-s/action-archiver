@@ -7318,10 +7318,36 @@ module.exports = Zip;
     var ARROW_FN_ARGS = /^(?:async\s+)?\(?\s*([^)=]+)\s*\)?(?:\s*=>)/;
     var FN_ARG_SPLIT = /,/;
     var FN_ARG = /(=.+)?(\s*)$/;
-    var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+
+    function stripComments(string) {
+        let stripped = '';
+        let index = 0;
+        let endBlockComment = string.indexOf('*/');
+        while (index < string.length) {
+            if (string[index] === '/' && string[index+1] === '/') {
+                // inline comment
+                let endIndex = string.indexOf('\n', index);
+                index = (endIndex === -1) ? string.length : endIndex;
+            } else if ((endBlockComment !== -1) && (string[index] === '/') && (string[index+1] === '*')) {
+                // block comment
+                let endIndex = string.indexOf('*/', index);
+                if (endIndex !== -1) {
+                    index = endIndex + 2;
+                    endBlockComment = string.indexOf('*/', index);
+                } else {
+                    stripped += string[index];
+                    index++;
+                }
+            } else {
+                stripped += string[index];
+                index++;
+            }
+        }
+        return stripped;
+    }
 
     function parseParams(func) {
-        const src = func.toString().replace(STRIP_COMMENTS, '');
+        const src = stripComments(func.toString());
         let match = src.match(FN_ARGS);
         if (!match) {
             match = src.match(ARROW_FN_ARGS);
@@ -8078,7 +8104,7 @@ module.exports = Zip;
      * app.get('/cats', function(request, response) {
      *     var User = request.models.User;
      *     async.seq(
-     *         _.bind(User.get, User),  // 'User.get' has signature (id, callback(err, data))
+     *         User.get.bind(User),  // 'User.get' has signature (id, callback(err, data))
      *         function(user, fn) {
      *             user.getCats(fn);      // 'getCats' has signature (callback(err, data))
      *         }
@@ -9711,6 +9737,8 @@ module.exports = Zip;
         memoized.unmemoized = fn;
         return memoized;
     }
+
+    /* istanbul ignore file */
 
     /**
      * Calls `callback` on a later loop around the event loop. In Node.js this just
@@ -14572,7 +14600,7 @@ function objectToString(o) {
 /***/ 3201:
 /***/ ((__unused_webpack_module, exports) => {
 
-/* crc32.js (C) 2014-present SheetJS -- http://sheetjs.com */
+/*! crc32.js (C) 2014-present SheetJS -- http://sheetjs.com */
 /* vim: set ts=2: */
 /*exported CRC32 */
 var CRC32;
@@ -14589,8 +14617,7 @@ var CRC32;
 	/*eslint-enable */
 	/*jshint ignore:end */
 }(function(CRC32) {
-CRC32.version = '1.2.0';
-/* see perf/crc32table.js */
+CRC32.version = '1.2.1';
 /*global Int32Array */
 function signed_crc_table() {
 	var c = 0, table = new Array(256);
@@ -14611,70 +14638,68 @@ function signed_crc_table() {
 	return typeof Int32Array !== 'undefined' ? new Int32Array(table) : table;
 }
 
-var T = signed_crc_table();
+var T0 = signed_crc_table();
+function slice_by_16_tables(T) {
+	var c = 0, v = 0, n = 0, table = typeof Int32Array !== 'undefined' ? new Int32Array(4096) : new Array(4096) ;
+
+	for(n = 0; n != 256; ++n) table[n] = T[n];
+	for(n = 0; n != 256; ++n) {
+		v = T[n];
+		for(c = 256 + n; c < 4096; c += 256) v = table[c] = (v >>> 8) ^ T[v & 0xFF];
+	}
+	var out = [];
+	for(n = 1; n != 16; ++n) out[n - 1] = typeof Int32Array !== 'undefined' ? table.subarray(n * 256, n * 256 + 256) : table.slice(n * 256, n * 256 + 256);
+	return out;
+}
+var TT = slice_by_16_tables(T0);
+var T1 = TT[0],  T2 = TT[1],  T3 = TT[2],  T4 = TT[3],  T5 = TT[4];
+var T6 = TT[5],  T7 = TT[6],  T8 = TT[7],  T9 = TT[8],  Ta = TT[9];
+var Tb = TT[10], Tc = TT[11], Td = TT[12], Te = TT[13], Tf = TT[14];
 function crc32_bstr(bstr, seed) {
-	var C = seed ^ -1, L = bstr.length - 1;
-	for(var i = 0; i < L;) {
-		C = (C>>>8) ^ T[(C^bstr.charCodeAt(i++))&0xFF];
-		C = (C>>>8) ^ T[(C^bstr.charCodeAt(i++))&0xFF];
-	}
-	if(i === L) C = (C>>>8) ^ T[(C ^ bstr.charCodeAt(i))&0xFF];
-	return C ^ -1;
+	var C = seed ^ -1;
+	for(var i = 0, L = bstr.length; i < L;) C = (C>>>8) ^ T0[(C^bstr.charCodeAt(i++))&0xFF];
+	return ~C;
 }
 
-function crc32_buf(buf, seed) {
-	if(buf.length > 10000) return crc32_buf_8(buf, seed);
-	var C = seed ^ -1, L = buf.length - 3;
-	for(var i = 0; i < L;) {
-		C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-		C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-		C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-		C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-	}
-	while(i < L+3) C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-	return C ^ -1;
-}
-
-function crc32_buf_8(buf, seed) {
-	var C = seed ^ -1, L = buf.length - 7;
-	for(var i = 0; i < L;) {
-		C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-		C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-		C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-		C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-		C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-		C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-		C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-		C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-	}
-	while(i < L+7) C = (C>>>8) ^ T[(C^buf[i++])&0xFF];
-	return C ^ -1;
+function crc32_buf(B, seed) {
+	var C = seed ^ -1, L = B.length - 15, i = 0;
+	for(; i < L;) C =
+		Tf[B[i++] ^ (C & 255)] ^
+		Te[B[i++] ^ ((C >> 8) & 255)] ^
+		Td[B[i++] ^ ((C >> 16) & 255)] ^
+		Tc[B[i++] ^ (C >>> 24)] ^
+		Tb[B[i++]] ^ Ta[B[i++]] ^ T9[B[i++]] ^ T8[B[i++]] ^
+		T7[B[i++]] ^ T6[B[i++]] ^ T5[B[i++]] ^ T4[B[i++]] ^
+		T3[B[i++]] ^ T2[B[i++]] ^ T1[B[i++]] ^ T0[B[i++]];
+	L += 15;
+	while(i < L) C = (C>>>8) ^ T0[(C^B[i++])&0xFF];
+	return ~C;
 }
 
 function crc32_str(str, seed) {
 	var C = seed ^ -1;
-	for(var i = 0, L=str.length, c, d; i < L;) {
+	for(var i = 0, L = str.length, c = 0, d = 0; i < L;) {
 		c = str.charCodeAt(i++);
 		if(c < 0x80) {
-			C = (C>>>8) ^ T[(C ^ c)&0xFF];
+			C = (C>>>8) ^ T0[(C^c)&0xFF];
 		} else if(c < 0x800) {
-			C = (C>>>8) ^ T[(C ^ (192|((c>>6)&31)))&0xFF];
-			C = (C>>>8) ^ T[(C ^ (128|(c&63)))&0xFF];
+			C = (C>>>8) ^ T0[(C ^ (192|((c>>6)&31)))&0xFF];
+			C = (C>>>8) ^ T0[(C ^ (128|(c&63)))&0xFF];
 		} else if(c >= 0xD800 && c < 0xE000) {
 			c = (c&1023)+64; d = str.charCodeAt(i++)&1023;
-			C = (C>>>8) ^ T[(C ^ (240|((c>>8)&7)))&0xFF];
-			C = (C>>>8) ^ T[(C ^ (128|((c>>2)&63)))&0xFF];
-			C = (C>>>8) ^ T[(C ^ (128|((d>>6)&15)|((c&3)<<4)))&0xFF];
-			C = (C>>>8) ^ T[(C ^ (128|(d&63)))&0xFF];
+			C = (C>>>8) ^ T0[(C ^ (240|((c>>8)&7)))&0xFF];
+			C = (C>>>8) ^ T0[(C ^ (128|((c>>2)&63)))&0xFF];
+			C = (C>>>8) ^ T0[(C ^ (128|((d>>6)&15)|((c&3)<<4)))&0xFF];
+			C = (C>>>8) ^ T0[(C ^ (128|(d&63)))&0xFF];
 		} else {
-			C = (C>>>8) ^ T[(C ^ (224|((c>>12)&15)))&0xFF];
-			C = (C>>>8) ^ T[(C ^ (128|((c>>6)&63)))&0xFF];
-			C = (C>>>8) ^ T[(C ^ (128|(c&63)))&0xFF];
+			C = (C>>>8) ^ T0[(C ^ (224|((c>>12)&15)))&0xFF];
+			C = (C>>>8) ^ T0[(C ^ (128|((c>>6)&63)))&0xFF];
+			C = (C>>>8) ^ T0[(C ^ (128|(c&63)))&0xFF];
 		}
 	}
-	return C ^ -1;
+	return ~C;
 }
-CRC32.table = T;
+CRC32.table = T0;
 // $FlowIgnore
 CRC32.bstr = crc32_bstr;
 // $FlowIgnore
@@ -17760,8 +17785,10 @@ function patch (fs) {
     return function (target, options) {
       var stats = options ? orig.call(fs, target, options)
         : orig.call(fs, target)
-      if (stats.uid < 0) stats.uid += 0x100000000
-      if (stats.gid < 0) stats.gid += 0x100000000
+      if (stats) {
+        if (stats.uid < 0) stats.uid += 0x100000000
+        if (stats.gid < 0) stats.gid += 0x100000000
+      }
       return stats;
     }
   }
@@ -24359,10 +24386,10 @@ module.exports = union;
 module.exports = minimatch
 minimatch.Minimatch = Minimatch
 
-var path = { sep: '/' }
-try {
-  path = __nccwpck_require__(1017)
-} catch (er) {}
+var path = (function () { try { return __nccwpck_require__(1017) } catch (e) {}}()) || {
+  sep: '/'
+}
+minimatch.sep = path.sep
 
 var GLOBSTAR = minimatch.GLOBSTAR = Minimatch.GLOBSTAR = {}
 var expand = __nccwpck_require__(3717)
@@ -24414,43 +24441,64 @@ function filter (pattern, options) {
 }
 
 function ext (a, b) {
-  a = a || {}
   b = b || {}
   var t = {}
-  Object.keys(b).forEach(function (k) {
-    t[k] = b[k]
-  })
   Object.keys(a).forEach(function (k) {
     t[k] = a[k]
+  })
+  Object.keys(b).forEach(function (k) {
+    t[k] = b[k]
   })
   return t
 }
 
 minimatch.defaults = function (def) {
-  if (!def || !Object.keys(def).length) return minimatch
+  if (!def || typeof def !== 'object' || !Object.keys(def).length) {
+    return minimatch
+  }
 
   var orig = minimatch
 
   var m = function minimatch (p, pattern, options) {
-    return orig.minimatch(p, pattern, ext(def, options))
+    return orig(p, pattern, ext(def, options))
   }
 
   m.Minimatch = function Minimatch (pattern, options) {
     return new orig.Minimatch(pattern, ext(def, options))
+  }
+  m.Minimatch.defaults = function defaults (options) {
+    return orig.defaults(ext(def, options)).Minimatch
+  }
+
+  m.filter = function filter (pattern, options) {
+    return orig.filter(pattern, ext(def, options))
+  }
+
+  m.defaults = function defaults (options) {
+    return orig.defaults(ext(def, options))
+  }
+
+  m.makeRe = function makeRe (pattern, options) {
+    return orig.makeRe(pattern, ext(def, options))
+  }
+
+  m.braceExpand = function braceExpand (pattern, options) {
+    return orig.braceExpand(pattern, ext(def, options))
+  }
+
+  m.match = function (list, pattern, options) {
+    return orig.match(list, pattern, ext(def, options))
   }
 
   return m
 }
 
 Minimatch.defaults = function (def) {
-  if (!def || !Object.keys(def).length) return Minimatch
   return minimatch.defaults(def).Minimatch
 }
 
 function minimatch (p, pattern, options) {
-  if (typeof pattern !== 'string') {
-    throw new TypeError('glob pattern string required')
-  }
+  assertValidPattern(pattern)
 
   if (!options) options = {}
 
@@ -24458,9 +24506,6 @@ function minimatch (p, pattern, options) {
   if (!options.nocomment && pattern.charAt(0) === '#') {
     return false
   }
-
-  // "" only matches ""
-  if (pattern.trim() === '') return p === ''
 
   return new Minimatch(pattern, options).match(p)
 }
@@ -24470,15 +24515,14 @@ function Minimatch (pattern, options) {
     return new Minimatch(pattern, options)
   }
 
-  if (typeof pattern !== 'string') {
-    throw new TypeError('glob pattern string required')
-  }
+  assertValidPattern(pattern)
 
   if (!options) options = {}
+
   pattern = pattern.trim()
 
   // windows support: need to use /, not \
-  if (path.sep !== '/') {
+  if (!options.allowWindowsEscape && path.sep !== '/') {
     pattern = pattern.split(path.sep).join('/')
   }
 
@@ -24489,6 +24533,7 @@ function Minimatch (pattern, options) {
   this.negate = false
   this.comment = false
   this.empty = false
+  this.partial = !!options.partial
 
   // make the set of regexps etc.
   this.make()
@@ -24498,9 +24543,6 @@ Minimatch.prototype.debug = function () {}
 
 Minimatch.prototype.make = make
 function make () {
-  // don't do it more than once.
-  if (this._made) return
-
   var pattern = this.pattern
   var options = this.options
 
@@ -24520,7 +24562,7 @@ function make () {
   // step 2: expand braces
   var set = this.globSet = this.braceExpand()
 
-  if (options.debug) this.debug = console.error
+  if (options.debug) this.debug = function debug() { console.error.apply(console, arguments) }
 
   this.debug(this.pattern, set)
 
@@ -24600,17 +24642,27 @@ function braceExpand (pattern, options) {
   pattern = typeof pattern === 'undefined'
     ? this.pattern : pattern
 
-  if (typeof pattern === 'undefined') {
-    throw new TypeError('undefined pattern')
-  }
+  assertValidPattern(pattern)
 
-  if (options.nobrace ||
-    !pattern.match(/\{.*\}/)) {
+  // Thanks to Yeting Li <https://github.com/yetingli> for
+  // improving this regexp to avoid a ReDOS vulnerability.
+  if (options.nobrace || !/\{(?:(?!\{).)*\}/.test(pattern)) {
     // shortcut. no need to expand.
     return [pattern]
   }
 
   return expand(pattern)
+}
+
+var MAX_PATTERN_LENGTH = 1024 * 64
+var assertValidPattern = function (pattern) {
+  if (typeof pattern !== 'string') {
+    throw new TypeError('invalid pattern')
+  }
+
+  if (pattern.length > MAX_PATTERN_LENGTH) {
+    throw new TypeError('pattern is too long')
+  }
 }
 
 // parse a component of the expanded set.
@@ -24627,14 +24679,17 @@ function braceExpand (pattern, options) {
 Minimatch.prototype.parse = parse
 var SUBPARSE = {}
 function parse (pattern, isSub) {
-  if (pattern.length > 1024 * 64) {
-    throw new TypeError('pattern is too long')
-  }
+  assertValidPattern(pattern)
 
   var options = this.options
 
   // shortcuts
-  if (!options.noglobstar && pattern === '**') return GLOBSTAR
+  if (pattern === '**') {
+    if (!options.noglobstar)
+      return GLOBSTAR
+    else
+      pattern = '*'
+  }
   if (pattern === '') return ''
 
   var re = ''
@@ -24690,10 +24745,12 @@ function parse (pattern, isSub) {
     }
 
     switch (c) {
-      case '/':
+      /* istanbul ignore next */
+      case '/': {
         // completely not allowed, even escaped.
         // Should already be path-split by now.
         return false
+      }
 
       case '\\':
         clearStateChar()
@@ -24812,25 +24869,23 @@ function parse (pattern, isSub) {
 
         // handle the case where we left a class open.
         // "[z-a]" is valid, equivalent to "\[z-a\]"
-        if (inClass) {
-          // split where the last [ was, make sure we don't have
-          // an invalid re. if so, re-walk the contents of the
-          // would-be class to re-translate any characters that
-          // were passed through as-is
-          // TODO: It would probably be faster to determine this
-          // without a try/catch and a new RegExp, but it's tricky
-          // to do safely.  For now, this is safe and works.
-          var cs = pattern.substring(classStart + 1, i)
-          try {
-            RegExp('[' + cs + ']')
-          } catch (er) {
-            // not a valid class!
-            var sp = this.parse(cs, SUBPARSE)
-            re = re.substr(0, reClassStart) + '\\[' + sp[0] + '\\]'
-            hasMagic = hasMagic || sp[1]
-            inClass = false
-            continue
-          }
+        // split where the last [ was, make sure we don't have
+        // an invalid re. if so, re-walk the contents of the
+        // would-be class to re-translate any characters that
+        // were passed through as-is
+        // TODO: It would probably be faster to determine this
+        // without a try/catch and a new RegExp, but it's tricky
+        // to do safely.  For now, this is safe and works.
+        var cs = pattern.substring(classStart + 1, i)
+        try {
+          RegExp('[' + cs + ']')
+        } catch (er) {
+          // not a valid class!
+          var sp = this.parse(cs, SUBPARSE)
+          re = re.substr(0, reClassStart) + '\\[' + sp[0] + '\\]'
+          hasMagic = hasMagic || sp[1]
+          inClass = false
+          continue
         }
 
         // finish up the class.
@@ -24914,9 +24969,7 @@ function parse (pattern, isSub) {
   // something that could conceivably capture a dot
   var addPatternStart = false
   switch (re.charAt(0)) {
-    case '.':
-    case '[':
-    case '(': addPatternStart = true
+    case '[': case '.': case '(': addPatternStart = true
   }
 
   // Hack to work around lack of negative lookbehind in JS
@@ -24978,7 +25031,7 @@ function parse (pattern, isSub) {
   var flags = options.nocase ? 'i' : ''
   try {
     var regExp = new RegExp('^' + re + '$', flags)
-  } catch (er) {
+  } catch (er) /* istanbul ignore next - should be impossible */ {
     // If it was an invalid regular expression, then it can't match
     // anything.  This trick looks for a character after the end of
     // the string, which is of course impossible, except in multi-line
@@ -25036,7 +25089,7 @@ function makeRe () {
 
   try {
     this.regexp = new RegExp(re, flags)
-  } catch (ex) {
+  } catch (ex) /* istanbul ignore next - should be impossible */ {
     this.regexp = false
   }
   return this.regexp
@@ -25054,8 +25107,8 @@ minimatch.match = function (list, pattern, options) {
   return list
 }
 
-Minimatch.prototype.match = match
-function match (f, partial) {
+Minimatch.prototype.match = function match (f, partial) {
+  if (typeof partial === 'undefined') partial = this.partial
   this.debug('match', f, this.pattern)
   // short-circuit in the case of busted things.
   // comments, etc.
@@ -25137,6 +25190,7 @@ Minimatch.prototype.matchOne = function (file, pattern, partial) {
 
     // should be impossible.
     // some invalid regexp stuff in the set.
+    /* istanbul ignore if */
     if (p === false) return false
 
     if (p === GLOBSTAR) {
@@ -25210,6 +25264,7 @@ Minimatch.prototype.matchOne = function (file, pattern, partial) {
       // no match was found.
       // However, in partial mode, we can't say this is necessarily over.
       // If there's more *pattern* left, then
+      /* istanbul ignore if */
       if (partial) {
         // ran out of file
         this.debug('\n>>> no match, partial?', file, fr, pattern, pr)
@@ -25223,11 +25278,7 @@ Minimatch.prototype.matchOne = function (file, pattern, partial) {
     // patterns with magic have been turned into regexps.
     var hit
     if (typeof p === 'string') {
-      if (options.nocase) {
-        hit = f.toLowerCase() === p.toLowerCase()
-      } else {
-        hit = f === p
-      }
+      hit = f === p
       this.debug('string match', p, f, hit)
     } else {
       hit = f.match(p)
@@ -25258,16 +25309,16 @@ Minimatch.prototype.matchOne = function (file, pattern, partial) {
     // this is ok if we're doing the match as part of
     // a glob fs traversal.
     return partial
-  } else if (pi === pl) {
+  } else /* istanbul ignore else */ if (pi === pl) {
     // ran out of pattern, still have file left.
     // this is only acceptable if we're on the very last
     // empty segment of a file with a trailing slash.
     // a/* should match a/b/
-    var emptyFileEnd = (fi === fl - 1) && (file[fi] === '')
-    return emptyFileEnd
+    return (fi === fl - 1) && (file[fi] === '')
   }
 
   // should be unreachable.
+  /* istanbul ignore next */
   throw new Error('wtf?')
 }
 
