@@ -1,11 +1,10 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import archiver, { Format } from 'archiver';
+import archiver from 'archiver';
 import isGlob from 'is-glob';
-import * as core from '@actions/core';
 
 import ensureDir from './utils/ensure-dir';
-import { ArchiveType, Options } from './types';
+import { ArchiveType, Options, Format } from './types';
 
 const defaultOptions: Options = {
   cwd: process.cwd(),
@@ -46,7 +45,7 @@ const guessExt = (options: Options): string => {
   return '.tar';
 };
 
-const getOutfilename = (input: string, archiveType: ArchiveType, options = defaultOptions): string => {
+const getOutfilename = (input: string, archiveType: ArchiveType, options: Options): string => {
   if (options.output) {
     return path.join(options.cwd, options.output);
   }
@@ -69,7 +68,6 @@ const getOutfilename = (input: string, archiveType: ArchiveType, options = defau
 
 class Archiver {
   options = defaultOptions;
-
   outfile!: string;
 
   constructor(options = defaultOptions) {
@@ -138,13 +136,11 @@ class Archiver {
       }
 
       default:
-        core.info('Unknown archive type');
-        break;
+        throw new Error('Unknown archive type. Input file or directory not found.');
     }
 
     await archive.finalize();
     await streamClose;
-    core.setOutput('archive', this.outfile);
   }
 }
 

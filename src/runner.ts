@@ -1,10 +1,9 @@
 import path from 'node:path';
 import * as core from '@actions/core';
-import type { ArchiverOptions, Format } from 'archiver';
 
 import Archiver from './archiver';
 import cleanObj from './utils/clean-object';
-import { ZlibOptions } from './types';
+import type { ZlibOptions, ArchiverOptions, Format, Inputs } from './types';
 
 const getArchiverOptions = (format: Format): ArchiverOptions => {
   const compressionLevel = core.getInput('compression-level');
@@ -34,33 +33,45 @@ const getArchiverOptions = (format: Format): ArchiverOptions => {
   return options;
 };
 
-const run = async () => {
-  core.startGroup('Archiver');
-  const format = core.getInput('format', { required: true }) as Format;
+const getInputs = ():Inputs => {
+  return {
+    format: core.getInput('format', { required: true }) as Format,
+    path: core.getInput('path', { required: true }),
+    output: core.getInput('output', { required: true }),
+    workingDirectory: core.getInput('working-directory'),
+    ignore: core.getMultilineInput('ignore'),
+  };
+};
 
-  if (!Archiver.isRegisteredFormat(format)) {
-    throw new Error(`Format '${format}' is not registered.`);
+const run = async (): Promise<void> => {
+  try {
+    core.startGroup('Archiver');
+
+    const inputs = getInputs();
+
+    if (!Archiver.isRegisteredFormat(inputs.format)) {
+      throw new Error(`Format '${inputs.format}' is not registered.`);
+    }
+
+    const options = getArchiverOptions(inputs.format);
+    const cwd = path.join(process.cwd(), inputs.workingDirectory);
+
+    const archiver = new Archiver({
+      cwd,
+      format: inputs.format,
+      path: inputs.path,
+      output: inputs.output,
+      archiveOptions: cleanObj(options),
+      ignore: inputs.ignore,
+    });
+
+    await archiver.run();
+    core.setOutput('archive', archiver.outfile);
+
+    core.endGroup();
+  } catch (err) {
+    core.setFailed(err.message);
   }
-
-  const inputPath = core.getInput('path', { required: true });
-  const output = core.getInput('output', { required: true });
-  const workingDirectory = core.getInput('working-directory');
-  const ignore = core.getMultilineInput('ignore');
-
-  const options = getArchiverOptions(format);
-  const cwd = path.join(process.cwd(), workingDirectory);
-
-  const archiver = new Archiver({
-    cwd,
-    format,
-    path: inputPath,
-    output,
-    archiveOptions: cleanObj(options),
-    ignore,
-  });
-
-  await archiver.run();
-  core.endGroup();
 };
 
 export default run;

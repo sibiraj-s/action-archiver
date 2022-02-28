@@ -11,6 +11,7 @@ import tempy from './utils/tempy';
 const mockStartGroup = jest.spyOn(core, 'startGroup');
 const mockEndGroup = jest.spyOn(core, 'endGroup');
 const mockSetOutput = jest.spyOn(core, 'setOutput');
+const mockSetFailed = jest.spyOn(core, 'setFailed');
 
 describe('Runner', () => {
   beforeEach(() => {
@@ -39,6 +40,8 @@ describe('Runner', () => {
 
     expect(mockSetOutput).toHaveBeenCalled();
     expect(mockSetOutput).toHaveBeenCalledWith('archive', outfile);
+
+    expect(mockSetFailed).not.toHaveBeenCalled();
   });
 
   it('should create a zip archive', async () => {
@@ -51,8 +54,14 @@ describe('Runner', () => {
     expect(fs.existsSync(outfile)).toBe(true);
   });
 
-  it('should throw error for unknown format', () => {
+  it('should set job as failed for unknown format', async () => {
     process.env.INPUT_FORMAT = 'xar';
-    expect(run()).rejects.toThrow('Format \'xar\' is not registered.');
+    process.env.INPUT_PATH = '*';
+    process.env.INPUT_OUTPUT = 'runner_a.zip';
+
+    await run();
+
+    expect(mockSetFailed).toHaveBeenCalled();
+    expect(mockSetFailed).toHaveBeenCalledWith('Format \'xar\' is not registered.');
   });
 });

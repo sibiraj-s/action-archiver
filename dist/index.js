@@ -6,25 +6,6 @@ require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -33,7 +14,6 @@ const node_path_1 = __importDefault(__nccwpck_require__(9411));
 const node_fs_1 = __importDefault(__nccwpck_require__(7561));
 const archiver_1 = __importDefault(__nccwpck_require__(3084));
 const is_glob_1 = __importDefault(__nccwpck_require__(4466));
-const core = __importStar(__nccwpck_require__(2186));
 const ensure_dir_1 = __importDefault(__nccwpck_require__(8636));
 const defaultOptions = {
     cwd: process.cwd(),
@@ -66,7 +46,7 @@ const guessExt = (options) => {
     }
     return '.tar';
 };
-const getOutfilename = (input, archiveType, options = defaultOptions) => {
+const getOutfilename = (input, archiveType, options) => {
     if (options.output) {
         return node_path_1.default.join(options.cwd, options.output);
     }
@@ -136,12 +116,10 @@ class Archiver {
                 break;
             }
             default:
-                core.info('Unknown archive type');
-                break;
+                throw new Error('Unknown archive type. Input file or directory not found.');
         }
         await archive.finalize();
         await streamClose;
-        core.setOutput('archive', this.outfile);
     }
 }
 exports["default"] = Archiver;
@@ -158,14 +136,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __importDefault(__nccwpck_require__(2186));
 const runner_1 = __importDefault(__nccwpck_require__(8209));
-try {
-    (0, runner_1.default)();
-}
-catch (err) {
-    core_1.default.setFailed(err.message);
-}
+(0, runner_1.default)();
 
 
 /***/ }),
@@ -223,28 +195,39 @@ const getArchiverOptions = (format) => {
     }
     return options;
 };
+const getInputs = () => {
+    return {
+        format: core.getInput('format', { required: true }),
+        path: core.getInput('path', { required: true }),
+        output: core.getInput('output', { required: true }),
+        workingDirectory: core.getInput('working-directory'),
+        ignore: core.getMultilineInput('ignore'),
+    };
+};
 const run = async () => {
-    core.startGroup('Archiver');
-    const format = core.getInput('format', { required: true });
-    if (!archiver_1.default.isRegisteredFormat(format)) {
-        throw new Error(`Format '${format}' is not registered.`);
+    try {
+        core.startGroup('Archiver');
+        const inputs = getInputs();
+        if (!archiver_1.default.isRegisteredFormat(inputs.format)) {
+            throw new Error(`Format '${inputs.format}' is not registered.`);
+        }
+        const options = getArchiverOptions(inputs.format);
+        const cwd = node_path_1.default.join(process.cwd(), inputs.workingDirectory);
+        const archiver = new archiver_1.default({
+            cwd,
+            format: inputs.format,
+            path: inputs.path,
+            output: inputs.output,
+            archiveOptions: (0, clean_object_1.default)(options),
+            ignore: inputs.ignore,
+        });
+        await archiver.run();
+        core.setOutput('archive', archiver.outfile);
+        core.endGroup();
     }
-    const inputPath = core.getInput('path', { required: true });
-    const output = core.getInput('output', { required: true });
-    const workingDirectory = core.getInput('working-directory');
-    const ignore = core.getMultilineInput('ignore');
-    const options = getArchiverOptions(format);
-    const cwd = node_path_1.default.join(process.cwd(), workingDirectory);
-    const archiver = new archiver_1.default({
-        cwd,
-        format,
-        path: inputPath,
-        output,
-        archiveOptions: (0, clean_object_1.default)(options),
-        ignore,
-    });
-    await archiver.run();
-    core.endGroup();
+    catch (err) {
+        core.setFailed(err.message);
+    }
 };
 exports["default"] = run;
 

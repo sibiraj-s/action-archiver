@@ -1,15 +1,11 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import {
-  afterEach, beforeEach, describe, expect, it, jest,
-} from '@jest/globals';
-import * as core from '@actions/core';
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 import JSZip from 'jszip';
 
 import Archiver from '../src/archiver';
 import tempy from './utils/tempy';
 
-const mockSetOutput = jest.spyOn(core, 'setOutput');
 const { root } = tempy;
 
 const zipHasFile = async (zipPath: string, fileName: string): Promise<boolean> => {
@@ -29,7 +25,6 @@ describe('Archiver', () => {
 
   afterEach(async () => {
     await fs.promises.rm(root, { recursive: true, force: true });
-    mockSetOutput.mockReset();
   });
 
   it('should create zip with the given glob', async () => {
@@ -42,9 +37,6 @@ describe('Archiver', () => {
 
     await archiver.run();
     expect(fs.existsSync(archiver.outfile)).toBe(true);
-
-    expect(mockSetOutput).toHaveBeenCalled();
-    expect(mockSetOutput).toBeCalledWith('archive', archiver.outfile);
 
     expect(await zipHasFile(archiver.outfile, path.basename(file1))).toBe(true);
     expect(await zipHasFile(archiver.outfile, path.basename(file2))).toBe(true);
@@ -60,9 +52,6 @@ describe('Archiver', () => {
 
     await archiver.run();
     expect(fs.existsSync(archiver.outfile)).toBe(true);
-
-    expect(mockSetOutput).toHaveBeenCalled();
-    expect(mockSetOutput).toBeCalledWith('archive', archiver.outfile);
   });
 
   it('should create zip with the given directory', async () => {
@@ -75,9 +64,6 @@ describe('Archiver', () => {
 
     await archiver.run();
     expect(fs.existsSync(archiver.outfile)).toBe(true);
-
-    expect(mockSetOutput).toHaveBeenCalled();
-    expect(mockSetOutput).toBeCalledWith('archive', archiver.outfile);
 
     expect(await zipHasFile(archiver.outfile, path.basename(file1))).toBe(true);
     expect(await zipHasFile(archiver.outfile, path.basename(file2))).toBe(true);
@@ -97,9 +83,6 @@ describe('Archiver', () => {
     await archiver.run();
     expect(fs.existsSync(archiver.outfile)).toBe(true);
 
-    expect(mockSetOutput).toHaveBeenCalled();
-    expect(mockSetOutput).toBeCalledWith('archive', archiver.outfile);
-
     expect(await zipHasFile(archiver.outfile, path.basename(file1))).toBe(true);
     expect(await zipHasFile(archiver.outfile, path.basename(file2))).toBe(false);
   });
@@ -114,9 +97,6 @@ describe('Archiver', () => {
 
     await archiver.run();
     expect(fs.existsSync(archiver.outfile)).toBe(true);
-
-    expect(mockSetOutput).toHaveBeenCalled();
-    expect(mockSetOutput).toBeCalledWith('archive', archiver.outfile);
 
     expect(await zipHasFile(archiver.outfile, path.basename(file1))).toBe(true);
     expect(await zipHasFile(archiver.outfile, path.basename(file2))).toBe(true);
@@ -134,9 +114,6 @@ describe('Archiver', () => {
     await archiver.run();
     expect(fs.existsSync(archiver.outfile)).toBe(true);
 
-    expect(mockSetOutput).toHaveBeenCalled();
-    expect(mockSetOutput).toBeCalledWith('archive', archiver.outfile);
-
     expect(await zipHasFile(archiver.outfile, path.basename(file1))).toBe(true);
   });
 
@@ -149,9 +126,6 @@ describe('Archiver', () => {
 
     await archiver.run();
     expect(fs.existsSync(archiver.outfile)).toBe(true);
-
-    expect(mockSetOutput).toHaveBeenCalled();
-    expect(mockSetOutput).toBeCalledWith('archive', archiver.outfile);
 
     expect(archiver.outfile.endsWith('src.zip')).toBe(true);
   });
@@ -166,9 +140,6 @@ describe('Archiver', () => {
     await archiver.run();
     expect(fs.existsSync(archiver.outfile)).toBe(true);
 
-    expect(mockSetOutput).toHaveBeenCalled();
-    expect(mockSetOutput).toBeCalledWith('archive', archiver.outfile);
-
     expect(archiver.outfile.endsWith(`${path.basename(file1)}.zip`)).toBe(true);
   });
 
@@ -181,9 +152,6 @@ describe('Archiver', () => {
 
     await archiver.run();
     expect(fs.existsSync(archiver.outfile)).toBe(true);
-
-    expect(mockSetOutput).toHaveBeenCalled();
-    expect(mockSetOutput).toBeCalledWith('archive', archiver.outfile);
 
     expect(path.basename(archiver.outfile)).toBe('.tmp.tar');
   });
@@ -200,9 +168,6 @@ describe('Archiver', () => {
 
     await archiver.run();
     expect(fs.existsSync(archiver.outfile)).toBe(true);
-
-    expect(mockSetOutput).toHaveBeenCalled();
-    expect(mockSetOutput).toBeCalledWith('archive', archiver.outfile);
 
     expect(path.basename(archiver.outfile)).toBe('.tmp.tar.gz');
   });
