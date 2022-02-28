@@ -5,6 +5,7 @@ import JSZip from 'jszip';
 
 import Archiver from '../src/archiver';
 import tempy from './utils/tempy';
+import del from './utils/del';
 
 const { root } = tempy;
 
@@ -24,7 +25,7 @@ describe('Archiver', () => {
   });
 
   afterEach(async () => {
-    await fs.promises.rm(root, { recursive: true, force: true });
+    await del(root);
   });
 
   it('should create zip with the given glob', async () => {

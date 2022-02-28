@@ -7,6 +7,7 @@ import * as core from '@actions/core';
 
 import run from '../src/runner';
 import tempy from './utils/tempy';
+import del from './utils/del';
 
 const mockStartGroup = jest.spyOn(core, 'startGroup');
 const mockEndGroup = jest.spyOn(core, 'endGroup');
@@ -21,7 +22,7 @@ describe('Runner', () => {
   afterEach(async () => {
     jest.resetAllMocks();
     jest.clearAllMocks();
-    await fs.promises.rm(tempy.root, { force: true, recursive: true });
+    await del(tempy.root);
   });
 
   it('should create archive correctly', async () => {
