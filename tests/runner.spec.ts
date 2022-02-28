@@ -19,7 +19,8 @@ describe('Runner', () => {
   });
 
   afterEach(async () => {
-    jest.restoreAllMocks();
+    jest.resetAllMocks();
+    jest.clearAllMocks();
     await fs.promises.rm(tempy.root, { force: true, recursive: true });
   });
 

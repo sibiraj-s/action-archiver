@@ -174,19 +174,18 @@ const node_path_1 = __importDefault(__nccwpck_require__(9411));
 const core = __importStar(__nccwpck_require__(2186));
 const archiver_1 = __importDefault(__nccwpck_require__(178));
 const clean_object_1 = __importDefault(__nccwpck_require__(4963));
-const getArchiverOptions = (format) => {
-    const compressionLevel = core.getInput('compression-level');
+const getArchiverOptions = (inputs) => {
     const zlibOptions = {
-        level: Number(compressionLevel),
+        level: inputs.compressionLevel,
     };
     const options = {};
-    switch (format) {
+    switch (inputs.format) {
         case 'zip': {
             options.zlib = (0, clean_object_1.default)(zlibOptions);
             break;
         }
         case 'tar': {
-            options.gzip = core.getBooleanInput('gzip');
+            options.gzip = inputs.gzip;
             options.gzipOptions = (0, clean_object_1.default)(zlibOptions);
             break;
         }
@@ -197,10 +196,12 @@ const getArchiverOptions = (format) => {
 };
 const getInputs = () => {
     return {
+        workingDirectory: core.getInput('working-directory'),
         format: core.getInput('format', { required: true }),
         path: core.getInput('path', { required: true }),
         output: core.getInput('output', { required: true }),
-        workingDirectory: core.getInput('working-directory'),
+        gzip: core.getBooleanInput('gzip'),
+        compressionLevel: Number(core.getInput('compression-level')),
         ignore: core.getMultilineInput('ignore'),
     };
 };
@@ -211,7 +212,7 @@ const run = async () => {
         if (!archiver_1.default.isRegisteredFormat(inputs.format)) {
             throw new Error(`Format '${inputs.format}' is not registered.`);
         }
-        const options = getArchiverOptions(inputs.format);
+        const options = getArchiverOptions(inputs);
         const cwd = node_path_1.default.join(process.cwd(), inputs.workingDirectory);
         const archiver = new archiver_1.default({
             cwd,
@@ -524,6 +525,7 @@ function getBooleanInput(name, options) {
     const trueValue = ['true', 'True', 'TRUE'];
     const falseValue = ['false', 'False', 'FALSE'];
     const val = getInput(name, options);
+    console.log('**', typeof val, val)
     if (trueValue.includes(val))
         return true;
     if (falseValue.includes(val))
@@ -690,6 +692,7 @@ function getIDToken(aud) {
 }
 exports.getIDToken = getIDToken;
 //# sourceMappingURL=core.js.map
+
 
 /***/ }),
 
