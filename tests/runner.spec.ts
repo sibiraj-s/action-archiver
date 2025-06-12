@@ -15,7 +15,7 @@ const mockSetFailed = vi.spyOn(core, 'setFailed');
 
 describe('Runner', () => {
   beforeEach(() => {
-    ensureDir(tempy.root)
+    ensureDir(tempy.root);
     process.env['INPUT_WORKING-DIRECTORY'] = '.tmp/runner-test';
   });
 
@@ -64,6 +64,6 @@ describe('Runner', () => {
     await run();
 
     expect(mockSetFailed).toHaveBeenCalled();
-    expect(mockSetFailed).toHaveBeenCalledWith('Format \'xar\' is not registered.');
+    expect(mockSetFailed).toHaveBeenCalledWith("Format 'xar' is not registered.");
   });
 });

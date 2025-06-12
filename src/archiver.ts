@@ -103,7 +103,7 @@ class Archiver {
 
     const globOptions = {
       ignore: [
-        ...this.options.ignore || [],
+        ...(this.options.ignore || []),
         // don't include the outfile in the zip
         path.basename(this.outfile),
       ],

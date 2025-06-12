@@ -89,7 +89,7 @@ class Archiver {
         archive.pipe(output);
         const globOptions = {
             ignore: [
-                ...this.options.ignore || [],
+                ...(this.options.ignore || []),
                 // don't include the outfile in the zip
                 node_path_1.default.basename(this.outfile),
             ],

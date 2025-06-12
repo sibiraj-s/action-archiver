@@ -1,12 +1,4 @@
 {
-  "plugins": [
-    "typescript",
-    "unicorn",
-    "oxc",
-    "import",
-    "vitest"
-  ],
-  "ignorePatterns": [
-    "dist/"
-  ]
+  "plugins": ["typescript", "unicorn", "oxc", "import", "vitest"],
+  "ignorePatterns": ["dist/"]
 }

@@ -80,9 +80,7 @@ describe.sequential('Archiver', async () => {
       cwd: testRoot,
       path: './',
       output: 'archive_4.zip',
-      ignore: [
-        path.basename(file2),
-      ],
+      ignore: [path.basename(file2)],
     });
 
     await archiver.run();
