@@ -173,7 +173,7 @@ describe('Archiver', () => {
     expect(path.basename(archiver.outfile)).toBe('.tmp.tar.gz');
   });
 
-  it('should throw error when input does not exist', () => {
+  it('should throw error when input does not exist', async () => {
     const archiver = new Archiver({
       cwd: root,
       format: 'tar',
@@ -181,6 +181,6 @@ describe('Archiver', () => {
       output: 'no.zip',
     });
 
-    expect(archiver.run()).rejects.toThrow();
+    await expect(archiver.run()).rejects.toThrow("Path 'not_exist.file' doesnot exist");
   });
 });
