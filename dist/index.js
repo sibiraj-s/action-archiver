@@ -78,15 +78,15 @@ class Archiver {
         if (!archiveType) {
             throw new Error(`Path '${this.options.path}' does not exist`);
         }
-        const output = node_fs_1.default.createWriteStream(this.outfile);
-        const streamClose = new Promise((resolve) => {
-            output.on('close', () => {
-                resolve();
-            });
-        });
-        archive.pipe(output);
         const destDir = node_path_1.default.dirname(this.outfile);
         await (0, ensure_dir_1.default)(destDir);
+        const output = node_fs_1.default.createWriteStream(this.outfile);
+        const streamClose = new Promise((resolve, reject) => {
+            output.on('close', resolve);
+            output.on('error', reject);
+            archive.on('error', reject);
+        });
+        archive.pipe(output);
         const globOptions = {
             ignore: [
                 ...this.options.ignore || [],

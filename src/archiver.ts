@@ -89,17 +89,17 @@ class Archiver {
       throw new Error(`Path '${this.options.path}' does not exist`);
     }
 
+    const destDir = path.dirname(this.outfile);
+    await ensureDir(destDir);
+
     const output = fs.createWriteStream(this.outfile);
-    const streamClose = new Promise<void>((resolve) => {
-      output.on('close', () => {
-        resolve();
-      });
+    const streamClose = new Promise<void>((resolve, reject) => {
+      output.on('close', resolve);
+      output.on('error', reject);
+      archive.on('error', reject);
     });
 
     archive.pipe(output);
-
-    const destDir = path.dirname(this.outfile);
-    await ensureDir(destDir);
 
     const globOptions = {
       ignore: [
