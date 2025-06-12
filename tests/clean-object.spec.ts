@@ -1,4 +1,5 @@
-import { describe, expect, it } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
+
 import cleanObj from '../src/utils/clean-object';
 
 describe('Util: Clean Object', () => {

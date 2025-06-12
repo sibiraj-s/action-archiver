@@ -16,8 +16,7 @@
   ],
   "scripts": {
     "lint": "oxlint . --ignore-path .gitignore",
-    "test": "jest --runInBand",
-    "test:watch": "jest --watch --runInBand",
+    "test": "vitest",
     "build": "tsc",
     "package": "ncc build --source-map --license licenses.txt",
     "prepare": "is-ci || husky install"
@@ -29,18 +28,16 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.6",
-    "@jest/globals": "^29.5.0",
     "@types/archiver": "^5.3.2",
     "@types/is-glob": "^4.0.2",
     "@vercel/ncc": "^0.36.1",
     "commitlint-config-non-conventional": "^1.0.1",
     "husky": "^8.0.3",
     "is-ci": "^3.0.1",
-    "jest": "^29.5.0",
     "jszip": "^3.10.1",
     "lint-staged": "^13.2.3",
     "oxlint": "^1.1.0",
-    "ts-jest": "^29.1.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "vitest": "^3.2.3"
   }
 }

@@ -4,7 +4,7 @@
     "unicorn",
     "oxc",
     "import",
-    "jest"
+    "vitest"
   ],
   "ignorePatterns": [
     "dist/"

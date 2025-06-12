@@ -1,18 +1,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  afterEach, beforeEach, describe, expect, it, jest,
-} from '@jest/globals';
+  afterEach, beforeEach, describe, expect, it,vi
+} from 'vitest';
 import * as core from '@actions/core';
 
 import run from '../src/runner';
 import tempy from './utils/tempy';
 import del from './utils/del';
 
-const mockStartGroup = jest.spyOn(core, 'startGroup');
-const mockEndGroup = jest.spyOn(core, 'endGroup');
-const mockSetOutput = jest.spyOn(core, 'setOutput');
-const mockSetFailed = jest.spyOn(core, 'setFailed');
+const mockStartGroup = vi.spyOn(core, 'startGroup');
+const mockEndGroup = vi.spyOn(core, 'endGroup');
+const mockSetOutput = vi.spyOn(core, 'setOutput');
+const mockSetFailed = vi.spyOn(core, 'setFailed');
 
 describe('Runner', () => {
   beforeEach(() => {
@@ -20,8 +20,8 @@ describe('Runner', () => {
   });
 
   afterEach(async () => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
     await del(tempy.root);
   });
 

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 import JSZip from 'jszip';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import Archiver from '../src/archiver';
 import tempy from './utils/tempy';
@@ -15,7 +15,7 @@ const zipHasFile = async (zipPath: string, fileName: string): Promise<boolean> =
   return Object.keys(zip.files).includes(fileName);
 };
 
-describe('Archiver', () => {
+describe.sequential('Archiver', () => {
   let file1 = '';
   let file2 = '';
 
