@@ -14,6 +14,17 @@ All notable changes to this project will be documented in this file.
 > - Internal
 > - Unreleased
 
+## v1.2.0 (2025-06-12)
+
+#### Dependency Updates
+
+- Update @actions/core to v1.10.0 ([e6d4b22](https://github.com/sibiraj-s/action-archiver/commit/e6d4b22))
+- Update archiver to v7.0.1 ([847b0ae](https://github.com/sibiraj-s/action-archiver/commit/847b0ae))
+
+#### Bug Fixes
+
+- Improved error handling and flaky test fixes ([b0c1e3a](https://github.com/sibiraj-s/action-archiver/commit/b0c1e3a))
+
 ## v1.1.2 (2022-11-20)
 
 #### Dependency Updates
