@@ -118,7 +118,7 @@ describe.sequential('Archiver', () => {
     expect(await zipHasFile(archiver.outfile, path.basename(file1))).toBe(true);
   });
 
-  it('should guess the outfile filename for the given flob', async () => {
+  it('should guess the outfile filename for the given glob', async () => {
     const archiver = new Archiver({
       format: 'zip',
       cwd: root,
@@ -181,6 +181,6 @@ describe.sequential('Archiver', () => {
       output: 'no.zip',
     });
 
-    await expect(archiver.run()).rejects.toThrow("Path 'not_exist.file' doesnot exist");
+    await expect(archiver.run()).rejects.toThrow("Path 'not_exist.file' does not exist");
   });
 });

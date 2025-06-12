@@ -86,7 +86,7 @@ class Archiver {
     this.outfile = getOutfilename(input, archiveType, this.options);
 
     if (!archiveType) {
-      throw new Error(`Path '${this.options.path}' doesnot exist`);
+      throw new Error(`Path '${this.options.path}' does not exist`);
     }
 
     const output = fs.createWriteStream(this.outfile);
