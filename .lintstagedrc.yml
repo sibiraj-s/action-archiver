@@ -1,6 +1,6 @@
 '*{.js,.ts}':
   - oxlint --fix
-  - prettier --write
+  - oxfmt --write
 
 '*.{json,md,yml,yaml,yml}':
-  - prettier --write
+  - oxfmt --write

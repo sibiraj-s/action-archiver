@@ -1,19 +1,20 @@
 {
   "name": "action-archiver",
   "version": "1.2.0",
-  "description": "Github action to generate tar/zip archives",
-  "author": "sibiraj-s",
-  "license": "MIT",
   "private": "true",
-  "repository": "https://github.com/sibiraj-s/action-archiver.git",
-  "bugs": "https://github.com/sibiraj-s/action-archiver/issues",
-  "homepage": "https://github.com/sibiraj-s/action-archiver#readme",
-  "main": "lib/main.js",
+  "description": "Github action to generate tar/zip archives",
   "keywords": [
-    "github-actions",
     "archiver",
-    "artifacts"
+    "artifacts",
+    "github-actions"
   ],
+  "homepage": "https://github.com/sibiraj-s/action-archiver#readme",
+  "bugs": "https://github.com/sibiraj-s/action-archiver/issues",
+  "license": "MIT",
+  "author": "sibiraj-s",
+  "repository": "https://github.com/sibiraj-s/action-archiver.git",
+  "type": "module",
+  "main": "lib/main.js",
   "scripts": {
     "lint": "oxlint . --ignore-path .gitignore",
     "test": "vitest",
@@ -22,23 +23,23 @@
     "prepare": "is-ci || husky install"
   },
   "dependencies": {
-    "@actions/core": "^1.11.1",
+    "@actions/core": "^3.0.0",
     "archiver": "^7.0.1",
     "is-glob": "^4.0.3"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.8.1",
-    "@types/archiver": "^6.0.3",
+    "@commitlint/cli": "^20.4.4",
+    "@types/archiver": "^7.0.0",
     "@types/is-glob": "^4.0.4",
-    "@vercel/ncc": "^0.38.3",
+    "@vercel/ncc": "^0.38.4",
     "commitlint-config-non-conventional": "^1.0.1",
     "husky": "^9.1.7",
     "is-ci": "^4.1.0",
     "jszip": "^3.10.1",
-    "lint-staged": "^16.1.0",
-    "oxlint": "^1.1.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3",
-    "vitest": "^3.2.3"
+    "lint-staged": "^16.3.3",
+    "oxfmt": "^0.39.0",
+    "oxlint": "^1.54.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }
