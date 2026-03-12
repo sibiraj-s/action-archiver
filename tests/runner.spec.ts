@@ -1,17 +1,28 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import * as core from '@actions/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('@actions/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@actions/core')>();
+  return {
+    ...actual,
+    startGroup: vi.fn(actual.startGroup),
+    endGroup: vi.fn(actual.endGroup),
+    setOutput: vi.fn(actual.setOutput),
+    setFailed: vi.fn(actual.setFailed),
+  };
+});
+
+import * as core from '@actions/core';
 import run from '../src/runner';
 import ensureDir from '../src/utils/ensure-dir';
 import tempy from './utils/tempy';
 import del from './utils/del';
 
-const mockStartGroup = vi.spyOn(core, 'startGroup');
-const mockEndGroup = vi.spyOn(core, 'endGroup');
-const mockSetOutput = vi.spyOn(core, 'setOutput');
-const mockSetFailed = vi.spyOn(core, 'setFailed');
+const mockStartGroup = vi.mocked(core.startGroup);
+const mockEndGroup = vi.mocked(core.endGroup);
+const mockSetOutput = vi.mocked(core.setOutput);
+const mockSetFailed = vi.mocked(core.setFailed);
 
 describe('Runner', () => {
   beforeEach(() => {
