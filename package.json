@@ -1,6 +1,6 @@
 {
   "name": "action-archiver",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": "true",
   "description": "Github action to generate tar/zip archives",
   "keywords": [

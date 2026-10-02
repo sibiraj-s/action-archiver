@@ -14,6 +14,22 @@ All notable changes to this project will be documented in this file.
 > - Internal
 > - Unreleased
 
+## v1.3.0 (2026-10-02)
+
+#### Enhancements
+
+- Run action on Node.js 24 ([e663f9a](https://github.com/sibiraj-s/action-archiver/commit/e663f9a))
+
+#### Bug Fixes
+
+- Fix dist bundle missing source modules ([e663f9a](https://github.com/sibiraj-s/action-archiver/commit/e663f9a))
+- Fix action input defaults to use string type ([e663f9a](https://github.com/sibiraj-s/action-archiver/commit/e663f9a))
+
+#### Dependency Updates
+
+- Update @actions/core to v3.0.1 ([e663f9a](https://github.com/sibiraj-s/action-archiver/commit/e663f9a))
+- Update archiver to v8.0.0 ([e663f9a](https://github.com/sibiraj-s/action-archiver/commit/e663f9a))
+
 ## v1.2.0 (2025-06-12)
 
 #### Dependency Updates
