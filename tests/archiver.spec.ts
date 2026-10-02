@@ -15,7 +15,7 @@ const zipHasFile = async (zipPath: string, fileName: string): Promise<boolean> =
   return Object.keys(zip.files).includes(fileName);
 };
 
-describe.sequential('Archiver', async () => {
+describe('Archiver', () => {
   let testRoot = '';
   let file1 = '';
   let file2 = '';

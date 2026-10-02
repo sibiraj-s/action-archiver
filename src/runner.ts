@@ -1,9 +1,9 @@
 import path from 'node:path';
 import * as core from '@actions/core';
 
-import Archiver from './archiver';
-import cleanObj from './utils/clean-object';
-import type { ZlibOptions, ArchiverOptions, Format, Inputs } from './types';
+import Archiver from './archiver.js';
+import cleanObj from './utils/clean-object.js';
+import type { ZlibOptions, ArchiverOptions, Format, Inputs } from './types.js';
 
 const getArchiverOptions = (inputs: Inputs): ArchiverOptions => {
   const zlibOptions: ZlibOptions = {

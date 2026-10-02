@@ -1,4 +1,6 @@
-import type { ArchiverOptions, Format } from 'archiver';
+import type { ArchiverOptions } from 'archiver';
+
+export type Format = 'zip' | 'tar';
 
 export interface Inputs {
   workingDirectory: string;
@@ -25,4 +27,4 @@ export interface ZlibOptions {
   level: number;
 }
 
-export { ArchiverOptions, Format };
+export { ArchiverOptions };

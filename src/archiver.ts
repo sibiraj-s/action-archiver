@@ -1,10 +1,15 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import archiver from 'archiver';
+import { TarArchive, ZipArchive } from 'archiver';
 import isGlob from 'is-glob';
 
-import ensureDir from './utils/ensure-dir';
-import { ArchiveType, Options, Format } from './types';
+import ensureDir from './utils/ensure-dir.js';
+import { ArchiveType, Options, Format } from './types.js';
+
+const archives = {
+  zip: ZipArchive,
+  tar: TarArchive,
+};
 
 const defaultOptions: Options = {
   cwd: process.cwd(),
@@ -75,11 +80,11 @@ class Archiver {
   }
 
   static isRegisteredFormat(format: Format): boolean {
-    return archiver.isRegisteredFormat(format);
+    return Object.hasOwn(archives, format);
   }
 
   async run(): Promise<void> {
-    const archive = archiver(this.options.format, this.options.archiveOptions);
+    const archive = new archives[this.options.format](this.options.archiveOptions);
 
     const input = path.join(this.options.cwd, this.options.path);
     const archiveType = getArchiveType(input);
